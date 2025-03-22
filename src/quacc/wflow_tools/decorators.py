@@ -172,6 +172,16 @@ def job(_func: Callable[..., Any] | None = None, **kwargs) -> Job:
         wrapped_fn = _get_parsl_wrapped_func(_func, kwargs)
 
         return python_app(wrapped_fn, **kwargs)
+
+    elif settings.WORKFLOW_ENGINE == "ray":
+        import ray
+        
+        @ray.remote
+        @wraps(_func)
+        def wrapper():
+            return _func(*f_args, **f_kwargs)
+        
+        return wrapper
     elif settings.WORKFLOW_ENGINE == "redun":
         from redun import task
 
